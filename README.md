@@ -1,19 +1,23 @@
-# Album Tracker
+# The Vinyl Vault
 
-Album Tracker is a web app that lets users track the albums they've listened to, rate their favorites, and build a personal music collection. Users can save albums locally and see a history of their listening activity. This project focuses on creating an organized, user-friendly interface for music lovers.
+The Vinyl Vault is a web app that lets users track the albums they've listened to, rate their favorites, and build a personal music collection. Users can save albums locally, write reviews, and see a history of their listening activity. The app also includes suggested albums by genre, creating an organized and user-friendly experience for music lovers.
 
-## Planned Features
+## Working Features
 
-- Add albums to your personal collection
-- Rate albums with a star system
+- Add albums manually or from suggested recommendations
+- Rate albums using a 5-star system
+- Write and save personal reviews
+- Mark albums as favorites
 - View listening history
 - Filter albums by artist or genre
-- Optional: mark albums as “favorite” for quick reference
+- Browse suggested albums using an API
+- Data persists using localStorage
 
 ## Tech Stack
 
 - React (frontend framework)
+- JavaScript (ES6)
 - CSS for styling
-- LocalStorage for storing album data
-- GitHub for version control
-- Netlify/Vercel for deployment
+- localStorage for data persistence
+- Git & GitHub for version control
+- Netlify for deployment

@@ -1033,6 +1033,64 @@
   opacity: 0.85;
 }
 
+/* ── AI Personality ── */
+.personality-section {
+  margin: 16px 0 4px;
+}
+
+.personality-btn {
+  background: linear-gradient(135deg, #2d1b69, #6b2c91);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 10px 18px;
+  transition: opacity 0.2s;
+  width: 100%;
+}
+
+.personality-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.personality-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.personality-box {
+  background: rgba(155, 89, 182, 0.1);
+  border: 1px solid rgba(155, 89, 182, 0.35);
+  border-radius: 8px;
+  margin-top: 12px;
+  padding: 14px 16px;
+}
+
+.personality-label {
+  color: var(--purple-light);
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.personality-box p {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.personality-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+}
+
 /* ── Mobile responsiveness ── */
 @media (max-width: 640px) {
   .app-header {
