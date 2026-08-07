@@ -1730,6 +1730,7 @@
   border-radius: 3px;
   flex-shrink: 0;
   height: 34px;
+  object-fit: cover;
   width: 34px;
 }
 

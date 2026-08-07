@@ -6,11 +6,33 @@ const MAX_INDUCTEES = 5;
 function HallOfFame({ albums, onUpdate }) {
   const [selectedId, setSelectedId] = useState('');
   const [vinylImages, setVinylImages] = useState({});
+  const [coverArt, setCoverArt] = useState({});
 
   const inductees = albums.filter(a => a.hallOfFame);
   const candidates = albums.filter(a => !a.hallOfFame);
   const isFull = inductees.length >= MAX_INDUCTEES;
   const inducteeIds = inductees.map(a => a.id).join(',');
+
+  // Most albums already have artworkUrl saved from when they were added via
+  // search — only look up iTunes for the rare manually-added album with none.
+  useEffect(() => {
+    let cancelled = false;
+    const toFetch = albums.filter(a => a.hallOfFame && !a.artworkUrl && coverArt[a.id] === undefined);
+    toFetch.forEach(album => {
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(`${album.artist} ${album.title}`)}&entity=album&media=music&limit=1&country=us`;
+      fetch(url)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          const art = data?.results?.[0]?.artworkUrl100 || null;
+          if (!cancelled) setCoverArt(prev => ({ ...prev, [album.id]: art }));
+        })
+        .catch(() => {
+          if (!cancelled) setCoverArt(prev => ({ ...prev, [album.id]: null }));
+        });
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inducteeIds]);
 
   // Look up a real Discogs vinyl photo for any newly inducted album that
   // doesn't have one cached yet. Falls back to the drawn record (via the
@@ -82,7 +104,9 @@ function HallOfFame({ albums, onUpdate }) {
         <p className="empty-state">No albums inducted yet.</p>
       ) : (
         <div className="hof-frames">
-          {inductees.map((album, i) => (
+          {inductees.map((album, i) => {
+            const artUrl = album.artworkUrl || coverArt[album.id];
+            return (
             <div key={album.id} className="hof-frame">
               <div className="hof-plaque-frame">
                 <div className="hof-plaque-board">
@@ -91,7 +115,10 @@ function HallOfFame({ albums, onUpdate }) {
                     : <span className="hof-record" aria-hidden="true"></span>
                   }
                   <div className="hof-plaque-row">
-                    <span className="hof-chip" aria-hidden="true"></span>
+                    {artUrl
+                      ? <img className="hof-chip" src={artUrl} alt={`${album.title} cover`} />
+                      : <span className="hof-chip" aria-hidden="true"></span>
+                    }
                     <div className="hof-plaque">
                       <span className="hof-rank">No. {i + 1}</span>
                       <span className="hof-title">{album.title}</span>
@@ -109,7 +136,8 @@ function HallOfFame({ albums, onUpdate }) {
                 Retire
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
