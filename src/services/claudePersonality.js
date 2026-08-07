@@ -1,44 +1,23 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // AI Personality (Groq — OpenAI-compatible chat completions)
-//   Called after the user selects an album and clicks "What does this say about me?"
+//   Called after the user selects an album and clicks "Reveal its astrology".
 //   Sends album title, artist, and genre → receives a personality description.
 //
-//   Requires: REACT_APP_GROQ_API_KEY in your .env.local file
-//   Note: For a public app, proxy this through a backend to keep the key secret.
+//   Calls our own Netlify Function (netlify/functions/personality.js) instead
+//   of Groq directly, so the real API key stays server-side and never ships
+//   in the client bundle.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function generatePersonality({ title, artist, genre }) {
-  const apiKey = process.env.REACT_APP_GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      'Add REACT_APP_GROQ_API_KEY to your .env.local file to use this feature.'
-    );
-  }
-
-  const genreClause = genre ? ` (${genre})` : '';
-  const prompt =
-    `Someone just added "${title}" by ${artist}${genreClause} to their music collection. ` +
-    `In 2–3 sentences, write a fun, insightful personality description of what this says about them as a person. ` +
-    `Be specific to this album and artist. Keep it playful and flattering.`;
-
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const response = await fetch('/.netlify/functions/personality', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      max_tokens: 200,
-      messages: [{ role: 'user', content: prompt }],
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, artist, genre }),
   });
 
+  const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Groq API error (${response.status})`);
+    throw new Error(data.error || `Request failed (${response.status})`);
   }
-
-  const data = await response.json();
-  return data.choices[0].message.content;
+  return data.result;
 }

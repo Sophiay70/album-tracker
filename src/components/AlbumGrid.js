@@ -2,27 +2,56 @@ import { useState } from 'react';
 import AlbumCard from './AlbumCard';
 import FilterBar from './FilterBar';
 
-function AlbumGrid({ albums, onDelete, onToggleFavorite, onUpdate }) {
-  const [filters, setFilters] = useState({ genre: '', artist: '' });
+function sortAlbums(list, sortBy) {
+  const sorted = [...list];
+  switch (sortBy) {
+    case 'title-asc':
+      return sorted.sort((a, b) => a.title.localeCompare(b.title));
+    case 'artist-asc':
+      return sorted.sort((a, b) => a.artist.localeCompare(b.artist));
+    case 'rating-desc':
+      return sorted.sort((a, b) => b.rating - a.rating);
+    case 'date-desc':
+      return sorted.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+    default:
+      return sorted;
+  }
+}
+
+function AlbumGrid({ albums, onDelete, onToggleFavorite, onUpdate, onAddClick }) {
+  const [filters, setFilters] = useState({ genre: '', favoritesOnly: false, sortBy: '' });
 
   const filtered = albums.filter(a => {
     if (filters.genre && a.genre !== filters.genre) return false;
-    if (filters.artist && a.artist !== filters.artist) return false;
+    if (filters.favoritesOnly && !a.favorite) return false;
     return true;
   });
+  const visible = sortAlbums(filtered, filters.sortBy);
+
+  const addTile = onAddClick && (
+    <button
+      type="button"
+      className="add-album-trigger"
+      onClick={onAddClick}
+      aria-label="Add a new album to your library"
+    >
+      <span className="add-album-plus" aria-hidden="true">+</span>
+      <span>Add Album</span>
+    </button>
+  );
 
   if (albums.length === 0) {
-    return <p className="empty-state">No albums yet. Add your first album above!</p>;
+    return <div className="album-grid">{addTile}</div>;
   }
 
   return (
     <div>
       <FilterBar albums={albums} filters={filters} onFilterChange={setFilters} />
-      {filtered.length === 0 ? (
-        <p className="empty-state">No albums match your filters.</p>
-      ) : (
-        <div className="album-grid">
-          {filtered.map(album => (
+      <div className="album-grid">
+        {addTile}
+        {visible.length === 0
+          ? <p className="empty-state">No albums match your filters.</p>
+          : visible.map(album => (
             <AlbumCard
               key={album.id}
               album={album}
@@ -30,9 +59,9 @@ function AlbumGrid({ albums, onDelete, onToggleFavorite, onUpdate }) {
               onToggleFavorite={onToggleFavorite}
               onUpdate={onUpdate}
             />
-          ))}
-        </div>
-      )}
+          ))
+        }
+      </div>
     </div>
   );
 }

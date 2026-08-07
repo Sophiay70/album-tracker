@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import StarRating from './StarRating';
-import { generatePersonality } from '../services/claudePersonality';
+import { filterAlbumsOnly } from '../utils/itunes';
 
 const GENRES = [
   'Rock', 'Pop', 'Hip-Hop', 'Jazz', 'Classical', 'Electronic',
@@ -82,11 +82,6 @@ function AddAlbumForm({ onAdd, albums }) {
   const [searchError, setSearchError] = useState(false);
   const searchRef = useRef(null);
 
-  // AI personality state
-  const [personality, setPersonality] = useState('');
-  const [loadingPersonality, setLoadingPersonality] = useState(false);
-  const [personalityError, setPersonalityError] = useState('');
-
   // Debounced iTunes search — triggers when either search field changes
   useEffect(() => {
     const album = searchAlbum.trim();
@@ -116,7 +111,7 @@ function AddAlbumForm({ onAdd, albums }) {
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error();
         const data = await res.json();
-        setResults(data.results || []);
+        setResults(filterAlbumsOnly(data.results));
         setShowResults(true);
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -156,28 +151,6 @@ function AddAlbumForm({ onAdd, albums }) {
     setSuccess(false);
   }
 
-  // ── API CALL 2: Claude AI ────────────────────────────────────────────────
-  // Sends the selected album's title, artist, and genre to the Claude API
-  // and displays a personality-style description back in the form.
-  async function handleGeneratePersonality() {
-    setPersonality('');
-    setPersonalityError('');
-    setLoadingPersonality(true);
-    try {
-      const result = await generatePersonality({
-        title: form.title.trim(),
-        artist: form.artist.trim(),
-        genre: form.genre,
-      });
-      setPersonality(result);
-    } catch (err) {
-      setPersonalityError(err.message || 'Failed to generate personality. Try again.');
-    } finally {
-      setLoadingPersonality(false);
-    }
-  }
-  // ────────────────────────────────────────────────────────────────────────
-
   function handleChange(e) {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -203,8 +176,6 @@ function AddAlbumForm({ onAdd, albums }) {
 
     setForm(EMPTY_FORM);
     setTouched({});
-    setPersonality('');
-    setPersonalityError('');
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
   }
@@ -217,8 +188,6 @@ function AddAlbumForm({ onAdd, albums }) {
     setResults([]);
     setShowResults(false);
     setSuccess(false);
-    setPersonality('');
-    setPersonalityError('');
   }
 
   const errors = validate(form, albums);
@@ -376,29 +345,6 @@ function AddAlbumForm({ onAdd, albums }) {
           </span>
         </div>
       </div>
-
-      {/* ── API CALL 2: Claude AI — personality insight ── */}
-      {form.title && form.artist && (
-        <div className="personality-section">
-          <button
-            type="button"
-            className="personality-btn"
-            onClick={handleGeneratePersonality}
-            disabled={loadingPersonality}
-          >
-            {loadingPersonality ? 'Generating...' : '✨ What does this album say about me?'}
-          </button>
-          {personalityError && (
-            <p className="personality-error">{personalityError}</p>
-          )}
-          {personality && (
-            <div className="personality-box">
-              <span className="personality-label">Your music personality:</span>
-              <p>{personality}</p>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="form-actions">
         <button type="submit">Add Album</button>

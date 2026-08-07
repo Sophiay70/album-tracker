@@ -1,6 +1,13 @@
+const SORT_OPTIONS = [
+  { value: 'title-asc', label: 'Title (A–Z)' },
+  { value: 'artist-asc', label: 'Artist (A–Z)' },
+  { value: 'rating-desc', label: 'Rating (High to Low)' },
+  { value: 'date-desc', label: 'Date Added (Newest First)' },
+];
+
 function FilterBar({ albums, filters, onFilterChange }) {
   const genres = [...new Set(albums.map(a => a.genre).filter(Boolean))].sort();
-  const artists = [...new Set(albums.map(a => a.artist).filter(Boolean))].sort();
+  const hasActiveFilters = filters.genre || filters.favoritesOnly || filters.sortBy;
 
   return (
     <div className="filter-bar">
@@ -11,17 +18,27 @@ function FilterBar({ albums, filters, onFilterChange }) {
         <option value="">All genres</option>
         {genres.map(g => <option key={g} value={g}>{g}</option>)}
       </select>
-      <select
-        value={filters.artist}
-        onChange={e => onFilterChange({ ...filters, artist: e.target.value })}
+
+      <button
+        type="button"
+        className={`filter-toggle ${filters.favoritesOnly ? 'active' : ''}`}
+        onClick={() => onFilterChange({ ...filters, favoritesOnly: !filters.favoritesOnly })}
       >
-        <option value="">All artists</option>
-        {artists.map(a => <option key={a} value={a}>{a}</option>)}
+        ♥ Favorites only
+      </button>
+
+      <select
+        value={filters.sortBy}
+        onChange={e => onFilterChange({ ...filters, sortBy: e.target.value })}
+      >
+        <option value="">Sort by...</option>
+        {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
-      {(filters.genre || filters.artist) && (
+
+      {hasActiveFilters && (
         <button
           className="clear-filters"
-          onClick={() => onFilterChange({ genre: '', artist: '' })}
+          onClick={() => onFilterChange({ genre: '', favoritesOnly: false, sortBy: '' })}
         >
           Clear filters
         </button>

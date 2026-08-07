@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import StarRating from './StarRating';
+import { filterAlbumsOnly } from '../utils/itunes';
 
 const GENRES = [
   { label: 'Hip-Hop',    term: 'hip hop' },
@@ -43,7 +44,7 @@ function SuggestedAlbums({ albums, onAdd }) {
           seen.add(r.collectionId);
           return true;
         });
-        setSuggestions(unique);
+        setSuggestions(filterAlbumsOnly(unique));
       })
       .catch(err => { if (err.name !== 'AbortError') setError(true); })
       .finally(() => setLoading(false));
