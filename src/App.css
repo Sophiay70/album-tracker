@@ -1593,10 +1593,6 @@
 }
 
 /* Hall of Fame tab */
-.hof-section {
-  max-width: 1000px;
-}
-
 .hof-intro {
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -1642,7 +1638,7 @@
 .hof-frames {
   display: grid;
   gap: 28px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .hof-frame {
