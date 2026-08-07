@@ -5,51 +5,48 @@ const MAX_INDUCTEES = 5;
 
 function HallOfFame({ albums, onUpdate }) {
   const [selectedId, setSelectedId] = useState('');
-  const [vinylImages, setVinylImages] = useState({});
-  const [coverArt, setCoverArt] = useState({});
 
   const inductees = albums.filter(a => a.hallOfFame);
   const candidates = albums.filter(a => !a.hallOfFame);
   const isFull = inductees.length >= MAX_INDUCTEES;
   const inducteeIds = inductees.map(a => a.id).join(',');
 
-  // Most albums already have artworkUrl saved from when they were added via
-  // search — only look up iTunes for the rare manually-added album with none.
+  // Resolve each inducted album's vinyl photo and cover art once, then save
+  // the result onto the album itself (vinylImageUrl / resolvedCoverUrl).
+  // Without this, reloading the page would re-run the Discogs search and
+  // Gemini classification from scratch every time — and since neither is
+  // perfectly deterministic, that could silently swap in a different photo
+  // on every visit. Caching the result makes it permanent instead.
   useEffect(() => {
     let cancelled = false;
-    const toFetch = albums.filter(a => a.hallOfFame && !a.artworkUrl && coverArt[a.id] === undefined);
-    toFetch.forEach(album => {
+
+    const needsVinyl = albums.filter(a => a.hallOfFame && a.vinylImageUrl === undefined);
+    needsVinyl.forEach(album => {
+      fetchVinylImage({ title: album.title, artist: album.artist })
+        .then(url => {
+          if (!cancelled) onUpdate(album.id, { vinylImageUrl: url });
+        })
+        .catch(() => {
+          if (!cancelled) onUpdate(album.id, { vinylImageUrl: null });
+        });
+    });
+
+    const needsCover = albums.filter(
+      a => a.hallOfFame && !a.artworkUrl && a.resolvedCoverUrl === undefined
+    );
+    needsCover.forEach(album => {
       const url = `https://itunes.apple.com/search?term=${encodeURIComponent(`${album.artist} ${album.title}`)}&entity=album&media=music&limit=1&country=us`;
       fetch(url)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           const art = data?.results?.[0]?.artworkUrl100 || null;
-          if (!cancelled) setCoverArt(prev => ({ ...prev, [album.id]: art }));
+          if (!cancelled) onUpdate(album.id, { resolvedCoverUrl: art });
         })
         .catch(() => {
-          if (!cancelled) setCoverArt(prev => ({ ...prev, [album.id]: null }));
+          if (!cancelled) onUpdate(album.id, { resolvedCoverUrl: null });
         });
     });
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inducteeIds]);
 
-  // Look up a real Discogs vinyl photo for any newly inducted album that
-  // doesn't have one cached yet. Falls back to the drawn record (via the
-  // undefined/null check in the render below) if there's no token, no
-  // match, or the request fails.
-  useEffect(() => {
-    let cancelled = false;
-    const toFetch = albums.filter(a => a.hallOfFame && vinylImages[a.id] === undefined);
-    toFetch.forEach(album => {
-      fetchVinylImage({ title: album.title, artist: album.artist })
-        .then(url => {
-          if (!cancelled) setVinylImages(prev => ({ ...prev, [album.id]: url }));
-        })
-        .catch(() => {
-          if (!cancelled) setVinylImages(prev => ({ ...prev, [album.id]: null }));
-        });
-    });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inducteeIds]);
@@ -105,37 +102,37 @@ function HallOfFame({ albums, onUpdate }) {
       ) : (
         <div className="hof-frames">
           {inductees.map((album, i) => {
-            const artUrl = album.artworkUrl || coverArt[album.id];
+            const artUrl = album.artworkUrl || album.resolvedCoverUrl;
             return (
-            <div key={album.id} className="hof-frame">
-              <div className="hof-plaque-frame">
-                <div className="hof-plaque-board">
-                  {vinylImages[album.id]
-                    ? <img className="hof-record-photo" src={vinylImages[album.id]} alt={`${album.title} vinyl`} />
-                    : <span className="hof-record" aria-hidden="true"></span>
-                  }
-                  <div className="hof-plaque-row">
-                    {artUrl
-                      ? <img className="hof-chip" src={artUrl} alt={`${album.title} cover`} />
-                      : <span className="hof-chip" aria-hidden="true"></span>
+              <div key={album.id} className="hof-frame">
+                <div className="hof-plaque-frame">
+                  <div className="hof-plaque-board">
+                    {album.vinylImageUrl
+                      ? <img className="hof-record-photo" src={album.vinylImageUrl} alt={`${album.title} vinyl`} />
+                      : <span className="hof-record" aria-hidden="true"></span>
                     }
-                    <div className="hof-plaque">
-                      <span className="hof-rank">No. {i + 1}</span>
-                      <span className="hof-title">{album.title}</span>
-                      <span className="hof-artist">{album.artist}</span>
+                    <div className="hof-plaque-row">
+                      {artUrl
+                        ? <img className="hof-chip" src={artUrl} alt={`${album.title} cover`} />
+                        : <span className="hof-chip" aria-hidden="true"></span>
+                      }
+                      <div className="hof-plaque">
+                        <span className="hof-rank">No. {i + 1}</span>
+                        <span className="hof-title">{album.title}</span>
+                        <span className="hof-artist">{album.artist}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  className="hof-retire-btn"
+                  onClick={() => handleRetire(album.id)}
+                  title="Retire from Hall of Fame"
+                >
+                  Retire
+                </button>
               </div>
-              <button
-                type="button"
-                className="hof-retire-btn"
-                onClick={() => handleRetire(album.id)}
-                title="Retire from Hall of Fame"
-              >
-                Retire
-              </button>
-            </div>
             );
           })}
         </div>
