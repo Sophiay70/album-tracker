@@ -15,7 +15,7 @@ const avgRating = totalAlbums === 0 ? 0 : albums.reduce((sum, album) => sum + al
     <span className="note note-5">♪</span>
     <span className="note note-6">♫</span>
     <h2>Your Vault</h2>
-    <p>Track every album you own, rate it, write a review, and revisit your collection anytime.</p>
+    <p>Rate the albums you love, write reviews, and build your collection.</p>
     {/*button to library after hero banner*/}
 <button className="hero-cta" onClick={onGoToLibrary}>
   Add your records

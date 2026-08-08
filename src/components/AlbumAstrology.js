@@ -45,7 +45,7 @@ function AlbumAstrology({ albums }) {
   return (
     <div className="astrology-section">
       <p className="astrology-intro">
-        Pick an album from your collection and let AI reveal what it says about you.
+        What does your favorite album say about you? Pick one and find out.
       </p>
 
       <div className="suggestions-scroll astrology-thumbs">

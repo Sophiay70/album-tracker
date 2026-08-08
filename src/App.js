@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import vinylLogo from './img/VinylVaultlogo.png';
 import { useAlbums } from './hooks/useAlbums';
+import { useAlbumOfTheYear } from './hooks/useAlbumOfTheYear';
 import TabNav from './components/TabNav';
 import AddAlbumForm from './components/AddAlbumForm';
 import AlbumGrid from './components/AlbumGrid';
 import SuggestedAlbums from './components/SuggestedAlbums';
 import Hero from './components/Hero';
 import AlbumAstrology from './components/AlbumAstrology';
-import HallOfFame from './components/HallOfFame';
+import AlbumOfTheYears from './components/AlbumOfTheYears';
 
 function App() {
   const [activeTab, setActiveTab] = useState('Home');
   const [showAddModal, setShowAddModal] = useState(false);
   const { albums, addAlbum, deleteAlbum, toggleFavorite, updateAlbum } = useAlbums();
+  const { rankedIds, addToSlot, removeFromSlot, reorder } = useAlbumOfTheYear();
 
   useEffect(() => {
     if (!showAddModal) return;
@@ -34,7 +36,7 @@ function App() {
         <div className="header-title">
           <h1>The Vinyl Vault</h1>
         </div>
-        <p>Save, rate, and revisit your music collection</p>
+        <p>A home for the records you love</p>
       </header>
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="app-main">
@@ -58,10 +60,20 @@ function App() {
             />
           </div>
         )}
-        {activeTab === 'Hall of Fame' && (
+        {activeTab === 'Album of the Years' && (
           <div>
-            <h2 className="tab-title">Hall of Fame</h2>
-            <HallOfFame albums={albums} onUpdate={updateAlbum} />
+            <h2 className="tab-title">Album of the Years</h2>
+            <p className="tab-description">
+              Up to 5 albums you'd never skip a track on. Your personal Album of the Year(s).
+            </p>
+            <AlbumOfTheYears
+              albums={albums}
+              onUpdate={updateAlbum}
+              rankedIds={rankedIds}
+              onAdd={addToSlot}
+              onRemove={removeFromSlot}
+              onReorder={reorder}
+            />
           </div>
         )}
         {activeTab === 'Album Astrology' && (

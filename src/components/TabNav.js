@@ -1,5 +1,5 @@
 function TabNav({ activeTab, onTabChange }) {
-  const tabs = ['Home', 'Library', 'Hall of Fame', 'Album Astrology'];
+  const tabs = ['Home', 'Library', 'Album of the Years', 'Album Astrology'];
   return (
     <nav className="tab-nav">
       {tabs.map(tab => (
