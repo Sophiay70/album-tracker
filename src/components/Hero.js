@@ -1,3 +1,5 @@
+import gramophone from '../img/gramophone5.png';
+
 function Hero({ albums, onGoToLibrary }) {
     const totalAlbums = albums.length;
 const favoriteCount = albums.filter(a => a.favorite).length;
@@ -5,25 +7,23 @@ const avgRating = totalAlbums === 0 ? 0 : albums.reduce((sum, album) => sum + al
 
   return (
   <div className="hero">
-    {/*Music Notes */}
+    {/*Music Notes — trailing up and out of the gramophone's horn */}
     <span className="note note-1">♪</span>
-<span className="note note-2">♫</span>
-<span className="note note-3">♫</span>
-<span className="note note-4">♪</span>
-<span className="note note-5">♪</span>
-<span className="note note-6">♫</span>
-<span className="note note-7">♪</span>
-    <span className="note note-8">♫</span>
-    <span className="note note-9">♪</span>
-    <span className="note note-10">♫</span>
-    <span className="note note-11">♪</span>
-    <span className="note note-12">♫</span>
+    <span className="note note-2">♫</span>
+    <span className="note note-3">♪</span>
+    <span className="note note-4">♫</span>
+    <span className="note note-5">♪</span>
+    <span className="note note-6">♫</span>
     <h2>Your Vault</h2>
     <p>Track every album you own, rate it, write a review, and revisit your collection anytime.</p>
     {/*button to library after hero banner*/}
 <button className="hero-cta" onClick={onGoToLibrary}>
   Add your records
 </button>
+
+    <div className="hero-shelf">
+      <img src={gramophone} alt="" className="hero-gramophone" />
+    </div>
 
     <div className="hero-stats">
       <div className="stat">

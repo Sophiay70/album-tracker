@@ -1,12 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import StarRating from './StarRating';
 
-function AlbumCard({ album, onDelete, onToggleFavorite, onUpdate }) {
+function AlbumCard({ album, onDelete, onToggleFavorite, onUpdate, flipSignal }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editRating, setEditRating] = useState(album.rating);
   const [editReview, setEditReview] = useState(album.review || '');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const lastFlipSignal = useRef(flipSignal);
+
+  // "Flip Cards" in the filter bar bumps flipSignal to flip every card at
+  // once. Compare against the last value actually handled (rather than a
+  // simple "first render" flag) so this doesn't misfire under React Strict
+  // Mode, which intentionally re-runs effects once on mount in development.
+  useEffect(() => {
+    if (flipSignal === lastFlipSignal.current) return;
+    lastFlipSignal.current = flipSignal;
+    setIsFlipped(prev => !prev);
+  }, [flipSignal]);
 
   function handleSave() {
     onUpdate(album.id, { rating: editRating, review: editReview.trim() });

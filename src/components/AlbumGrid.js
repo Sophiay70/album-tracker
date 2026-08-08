@@ -11,6 +11,8 @@ function sortAlbums(list, sortBy) {
       return sorted.sort((a, b) => a.artist.localeCompare(b.artist));
     case 'rating-desc':
       return sorted.sort((a, b) => b.rating - a.rating);
+    case 'rating-asc':
+      return sorted.sort((a, b) => a.rating - b.rating);
     case 'date-desc':
       return sorted.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
     default:
@@ -20,6 +22,7 @@ function sortAlbums(list, sortBy) {
 
 function AlbumGrid({ albums, onDelete, onToggleFavorite, onUpdate, onAddClick }) {
   const [filters, setFilters] = useState({ genre: '', favoritesOnly: false, sortBy: '' });
+  const [flipSignal, setFlipSignal] = useState(0);
 
   const filtered = albums.filter(a => {
     if (filters.genre && a.genre !== filters.genre) return false;
@@ -46,7 +49,12 @@ function AlbumGrid({ albums, onDelete, onToggleFavorite, onUpdate, onAddClick })
 
   return (
     <div>
-      <FilterBar albums={albums} filters={filters} onFilterChange={setFilters} />
+      <FilterBar
+        albums={albums}
+        filters={filters}
+        onFilterChange={setFilters}
+        onFlipAll={() => setFlipSignal(s => s + 1)}
+      />
       <div className="album-grid">
         {addTile}
         {visible.length === 0
@@ -58,6 +66,7 @@ function AlbumGrid({ albums, onDelete, onToggleFavorite, onUpdate, onAddClick })
               onDelete={onDelete}
               onToggleFavorite={onToggleFavorite}
               onUpdate={onUpdate}
+              flipSignal={flipSignal}
             />
           ))
         }

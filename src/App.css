@@ -1,7 +1,7 @@
 :root {
-  --bg: #fff4ed;
-  --surface: #fff4ed;
-  --surface-2: #fff4ed;
+  --bg: #f5ead9;
+  --surface: #f5ead9;
+  --surface-2: #f5ead9;
   --border: #ddd0c2;
   --purple: #74926F;
   --purple-light: #A5B8A1;
@@ -31,7 +31,8 @@
 
 .hero h2 {
   color: var(--text);
-  font-size: 26px;
+  font-family: 'Edu NSW ACT Hand', cursive;
+  font-size: 34px;
   margin: 0 0 10px;
 }
 
@@ -58,6 +59,34 @@
 
 .hero-cta:hover {
   background-color: var(--purple-dark);
+}
+
+/* Sage checkerboard shelf strip — bleeds full-width past the hero's own
+   padding, and doubles as the "ground" the gramophone graphic rests on */
+.hero-shelf {
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(45deg, var(--purple) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--purple) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--purple) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--purple) 75%);
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-size: 16px 16px;
+  height: 18px;
+  margin: 28px -24px 0;
+  position: relative;
+}
+
+.hero-gramophone {
+  /* The source PNG has ~14.5% transparent padding below the drawing itself,
+     so the image is shifted down by that much to make the actual artwork
+     (not the invisible margin) rest on the shelf's top edge. */
+  bottom: calc(100% - 20px);
+  height: 140px;
+  left: 48px;
+  position: absolute;
+  width: auto;
+  z-index: 2;
 }
 
 .hero-stats {
@@ -95,88 +124,51 @@
   pointer-events: none;
 }
 
+/* Notes 1–6 rise up and out of the gramophone horn's mouth, which (given
+   the gramophone's own measured position) sits at roughly left:125px,
+   top:119px within the hero — not near the top of the banner at all. The
+   trail starts there and arcs up and to the right across the rest of the
+   banner, getting smaller/fainter-feeling as it "drifts away". */
 .note-1 {
-  top: 20px;
-  left: 30px;
-  font-size: 34px;
+  top: 82px;
+  left: 175px;
+  font-size: 24px;
   animation: floatA 6s ease-in-out infinite;
 }
 
 .note-2 {
-  bottom: 30px;
-  left: 70px;
-  font-size: 28px;
-  animation: floatB 8s ease-in-out infinite;
+  top: 78px;
+  left: 235px;
+  font-size: 22px;
+  animation: floatB 7s ease-in-out infinite;
 }
 
 .note-3 {
-  top: 60px;
-  right: 60px;
-  font-size: 25px;
-  animation: floatA 7s ease-in-out infinite;
+  top: 52px;
+  left: 355px;
+  font-size: 20px;
+  animation: floatA 8s ease-in-out infinite;
 }
 
 .note-4 {
-  bottom: 20px;
-  right: 30px;
-  font-size: 26px;
+  top: 30px;
+  left: 480px;
+  font-size: 18px;
   animation: floatB 9s ease-in-out infinite;
 }
 
 .note-5 {
-  top: 100px;
-  left: 150px;
-  font-size: 26px;
+  top: 14px;
+  left: 610px;
+  font-size: 17px;
   animation: floatA 10s ease-in-out infinite;
 }
 
 .note-6 {
-  top: 35px;
-  left: 220px;
-  font-size: 28px;
-  animation: floatB 7s ease-in-out infinite;
-}
-
-.note-7 {
-  bottom: 45px;
-  right: 150px;
-  font-size: 25px;
-  animation: floatA 9s ease-in-out infinite;
-}
-
-.note-8 {
-  top: 140px;
-  left: 60px;
-  font-size: 22px;
-  animation: floatB 6.5s ease-in-out infinite;
-}
-
-.note-9 {
-  top: 15px;
-  right: 180px;
-  font-size: 22px;
-  animation: floatA 8s ease-in-out infinite;
-}
-
-.note-10 {
-  bottom: 70px;
-  right: 250px;
-  font-size: 24px;
-  animation: floatB 10s ease-in-out infinite;
-}
-
-.note-11 {
-  bottom: 90px;
-  left: 250px;
-  font-size: 20px;
-  animation: floatA 7.5s ease-in-out infinite;
-}
-
-.note-12 {
-  top: 110px;
-  right: 90px;
-  font-size: 23px;
-  animation: floatB 7s ease-in-out infinite;
+  top: 24px;
+  left: 740px;
+  font-size: 16px;
+  animation: floatB 7.5s ease-in-out infinite;
 }
 
 @keyframes floatA {
@@ -807,6 +799,23 @@
   font-size: 0.9rem;
   padding: 8px 14px;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.flip-all-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.flip-all-btn:hover {
+  border-color: var(--purple);
+  color: var(--text);
 }
 
 .filter-toggle:hover {
@@ -1928,6 +1937,16 @@
   /* Hero: tighter padding and a smaller, closer-packed stats row */
   .hero {
     padding: 28px 16px;
+  }
+
+  .hero-shelf {
+    margin: 22px -16px 0;
+  }
+
+  .hero-gramophone {
+    bottom: calc(100% - 13px);
+    height: 90px;
+    left: 20px;
   }
 
   .hero-stats {
