@@ -34,7 +34,7 @@ function SuggestedAlbums({ albums, onAdd }) {
     setReview('');
 
     fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(activeGenre.term)}&entity=album&media=music&limit=20&country=us`,
+      `/.netlify/functions/itunes-search?term=${encodeURIComponent(activeGenre.term)}&limit=20`,
       { signal: controller.signal }
     )
       .then(r => { if (!r.ok) throw new Error(); return r.json(); })

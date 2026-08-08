@@ -103,11 +103,11 @@ function AddAlbumForm({ onAdd, albums }) {
       try {
         let url;
         if (album && artist) {
-          url = `https://itunes.apple.com/search?term=${encodeURIComponent(`${artist} ${album}`)}&entity=album&media=music&limit=8&country=us`;
+          url = `/.netlify/functions/itunes-search?term=${encodeURIComponent(`${artist} ${album}`)}&limit=8`;
         } else if (artist) {
-          url = `https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&entity=album&attribute=artistTerm&media=music&limit=8&country=us`;
+          url = `/.netlify/functions/itunes-search?term=${encodeURIComponent(artist)}&attribute=artistTerm&limit=8`;
         } else {
-          url = `https://itunes.apple.com/search?term=${encodeURIComponent(album)}&entity=album&attribute=albumTerm&media=music&limit=8&country=us`;
+          url = `/.netlify/functions/itunes-search?term=${encodeURIComponent(album)}&attribute=albumTerm&limit=8`;
         }
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error();

@@ -98,7 +98,7 @@ function AlbumOfTheYears({ albums, onUpdate, rankedIds, onAdd, onRemove, onReord
 
     const needsCover = rankedAlbums.filter(a => !a.artworkUrl && a.resolvedCoverUrl === undefined);
     needsCover.forEach(album => {
-      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(`${album.artist} ${album.title}`)}&entity=album&media=music&limit=1&country=us`;
+      const url = `/.netlify/functions/itunes-search?term=${encodeURIComponent(`${album.artist} ${album.title}`)}&limit=1`;
       fetch(url)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
