@@ -95,6 +95,7 @@ function AddAlbumForm({ onAdd, albums }) {
     }
 
     const controller = new AbortController();
+    let settled = false;
 
     const timer = setTimeout(async () => {
       setSearching(true);
@@ -119,10 +120,11 @@ function AddAlbumForm({ onAdd, albums }) {
           setResults([]);
         }
       } finally {
+        settled = true;
         if (!controller.signal.aborted) setSearching(false);
       }
     }, 400);
-    return () => { clearTimeout(timer); controller.abort(); };
+    return () => { clearTimeout(timer); if (!settled) controller.abort(); };
   }, [searchAlbum, searchArtist]);
 
   // Close dropdown on outside click

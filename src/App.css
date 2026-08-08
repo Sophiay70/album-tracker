@@ -1968,4 +1968,45 @@
   .stat-label {
     font-size: 0.68rem;
   }
+
+  /* Notes: desktop positions (left up to 740px) assume a wide banner and
+     get clipped or collide with the subtext on a narrow hero, so mobile
+     gets its own trail confined to the clear strip beside the gramophone
+     and to the right of the CTA button (button right edge ~250px,
+     paragraph bottom ~127px, shelf top ~209px on a 375px viewport). */
+  .note-1 {
+    top: 175px;
+    left: 258px;
+    font-size: 15px;
+  }
+
+  .note-2 {
+    top: 150px;
+    left: 285px;
+    font-size: 14px;
+  }
+
+  .note-3 {
+    top: 178px;
+    left: 310px;
+    font-size: 12px;
+  }
+
+  .note-4 {
+    top: 200px;
+    left: 292px;
+    font-size: 11px;
+  }
+
+  .note-5,
+  .note-6 {
+    display: none;
+  }
+
+  /* Centering an overflowing flex row makes it start mid-scroll, clipping
+     the first thumb on the left — on mobile the row overflows almost
+     immediately, so start it flush left like .suggestions-scroll does. */
+  .astrology-thumbs {
+    justify-content: flex-start;
+  }
 }

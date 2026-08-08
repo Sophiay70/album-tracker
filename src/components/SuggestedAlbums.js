@@ -24,6 +24,7 @@ function SuggestedAlbums({ albums, onAdd }) {
 
   useEffect(() => {
     const controller = new AbortController();
+    let settled = false;
 
     setLoading(true);
     setError(false);
@@ -47,9 +48,9 @@ function SuggestedAlbums({ albums, onAdd }) {
         setSuggestions(filterAlbumsOnly(unique));
       })
       .catch(err => { if (err.name !== 'AbortError') setError(true); })
-      .finally(() => setLoading(false));
+      .finally(() => { settled = true; setLoading(false); });
 
-    return () => controller.abort();
+    return () => { if (!settled) controller.abort(); };
   }, [activeGenre]);
 
   function isInLibrary(result) {
