@@ -7,7 +7,7 @@ const GENRES = [
   'R&B', 'Country', 'Folk', 'Metal', 'Indie', 'Other',
 ];
 
-const LIMITS = { title: 100, artist: 100, review: 500 };
+const LIMITS = { title: 100, artist: 100, review: 2000 };
 
 const EMPTY_FORM = { title: '', artist: '', genre: '', rating: 0, review: '', artworkUrl: '' };
 
@@ -336,6 +336,7 @@ function AddAlbumForm({ onAdd, albums }) {
           onChange={handleChange}
           onBlur={handleBlur}
           rows={3}
+          maxLength={LIMITS.review}
           className={visibleErrors.review ? 'input-error' : ''}
         />
         <div className="review-footer">

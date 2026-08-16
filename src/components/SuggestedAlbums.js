@@ -144,7 +144,7 @@ function SuggestedAlbums({ albums, onAdd }) {
                       value={review}
                       onChange={e => setReview(e.target.value)}
                       rows={3}
-                      maxLength={500}
+                      maxLength={2000}
                     />
                     <div className="suggestion-add-actions">
                       <button

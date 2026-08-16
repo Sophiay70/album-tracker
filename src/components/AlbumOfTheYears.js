@@ -6,6 +6,7 @@ import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sort
 import { CSS } from '@dnd-kit/utilities';
 import { fetchVinylImage } from '../services/discogs';
 import { MAX_SLOTS } from '../hooks/useAlbumOfTheYear';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 // A filled slot — visual design is unchanged from the original Hall of Fame
 // build: black frame, gold chip, vinyl photo (Discogs/Gemini) or drawn disc.
@@ -70,6 +71,7 @@ function EmptySlot({ onClick }) {
 
 function AlbumOfTheYears({ albums, onUpdate, rankedIds, onAdd, onRemove, onReorder }) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  useBodyScrollLock(pickerOpen);
 
   const rankedAlbums = rankedIds
     .map(id => albums.find(a => a.id === id))

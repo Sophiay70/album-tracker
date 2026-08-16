@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import StarRating from './StarRating';
 
+// Deterministic hash so each album's vinyl label color stays the same across
+// re-renders/reloads instead of flickering to a new color each time.
+function hashHue(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+}
+
 function AlbumCard({ album, onDelete, onToggleFavorite, onUpdate, flipSignal }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -59,6 +69,8 @@ function AlbumCard({ album, onDelete, onToggleFavorite, onUpdate, flipSignal }) 
     }
   }
 
+  const recordColor = `hsl(${hashHue(String(album.id ?? album.title))}, 65%, 72%)`;
+
   return (
     <div className="album-card-flip">
       <div className={`album-card ${isFlipped ? 'is-flipped' : ''}`}>
@@ -71,7 +83,11 @@ function AlbumCard({ album, onDelete, onToggleFavorite, onUpdate, flipSignal }) 
           onKeyDown={handleFrontKeyDown}
         >
           <div className="album-cover">
-            <span className="vinyl-disc" aria-hidden="true"></span>
+            <span
+              className="vinyl-disc"
+              style={{ '--record-color': recordColor }}
+              aria-hidden="true"
+            ></span>
             <div className="album-placeholder">
               {album.artworkUrl
                 ? <img src={album.artworkUrl} alt={`${album.title} cover`} />
@@ -99,72 +115,78 @@ function AlbumCard({ album, onDelete, onToggleFavorite, onUpdate, flipSignal }) 
             ↺
           </button>
 
-          <div className="album-card-header">
-            <div className="album-info">
-              <h3 className="album-title">{album.title}</h3>
-              <p className="album-artist">{album.artist}</p>
-              {album.genre && <span className="album-genre">{album.genre}</span>}
+          {/* Scrolling lives on this inner wrapper rather than .album-card-back
+              itself: WebKit fails to honor backface-visibility: hidden on an
+              element that also has overflow-y set, which left the front cover
+              visibly stacked on top of the flipped card on mobile Safari. */}
+          <div className="album-card-back-content">
+            <div className="album-card-header">
+              <div className="album-info">
+                <h3 className="album-title">{album.title}</h3>
+                <p className="album-artist">{album.artist}</p>
+                {album.genre && <span className="album-genre">{album.genre}</span>}
+              </div>
+              <div className="album-actions">
+                <button
+                  className={`fav-btn ${album.favorite ? 'favorited' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); onToggleFavorite(album.id); }}
+                  title={album.favorite ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  ♥
+                </button>
+                <button
+                  className="edit-btn"
+                  onClick={(e) => { e.stopPropagation(); handleEditClick(); }}
+                  title="Edit rating and review"
+                >
+                  ✎
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); setIsEditing(false); }}
+                  title="Delete album"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
-            <div className="album-actions">
-              <button
-                className={`fav-btn ${album.favorite ? 'favorited' : ''}`}
-                onClick={(e) => { e.stopPropagation(); onToggleFavorite(album.id); }}
-                title={album.favorite ? 'Remove from favorites' : 'Add to favorites'}
-              >
-                ♥
-              </button>
-              <button
-                className="edit-btn"
-                onClick={(e) => { e.stopPropagation(); handleEditClick(); }}
-                title="Edit rating and review"
-              >
-                ✎
-              </button>
-              <button
-                className="delete-btn"
-                onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); setIsEditing(false); }}
-                title="Delete album"
-              >
-                ✕
-              </button>
-            </div>
+
+            {isEditing ? (
+              <div className="card-edit-form">
+                <label className="card-edit-label">Rating</label>
+                <StarRating rating={editRating} onRate={setEditRating} />
+                <label className="card-edit-label">Review</label>
+                <textarea
+                  className="card-edit-textarea"
+                  value={editReview}
+                  onChange={e => setEditReview(e.target.value)}
+                  placeholder="Write a review (optional)"
+                  rows={3}
+                  maxLength={2000}
+                />
+                <div className="card-edit-actions">
+                  <button className="card-save-btn" onClick={handleSave}>Save</button>
+                  <button className="card-cancel-btn" onClick={handleCancelEdit}>Cancel</button>
+                </div>
+              </div>
+            ) : confirmDelete ? (
+              <div className="delete-confirm">
+                <p>Remove <strong>{album.title}</strong> from your library?</p>
+                <div className="delete-confirm-actions">
+                  <button className="delete-confirm-btn" onClick={() => onDelete(album.id)}>Remove</button>
+                  <button className="card-cancel-btn" onClick={() => setConfirmDelete(false)}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              album.review && <p className="album-review">"{album.review}"</p>
+            )}
+
+            <p className="album-date">
+              {album.dateAdded && !isNaN(new Date(album.dateAdded))
+                ? new Date(album.dateAdded).toLocaleDateString()
+                : 'Unknown date'}
+            </p>
           </div>
-
-          {isEditing ? (
-            <div className="card-edit-form">
-              <label className="card-edit-label">Rating</label>
-              <StarRating rating={editRating} onRate={setEditRating} />
-              <label className="card-edit-label">Review</label>
-              <textarea
-                className="card-edit-textarea"
-                value={editReview}
-                onChange={e => setEditReview(e.target.value)}
-                placeholder="Write a review (optional)"
-                rows={3}
-                maxLength={501}
-              />
-              <div className="card-edit-actions">
-                <button className="card-save-btn" onClick={handleSave}>Save</button>
-                <button className="card-cancel-btn" onClick={handleCancelEdit}>Cancel</button>
-              </div>
-            </div>
-          ) : confirmDelete ? (
-            <div className="delete-confirm">
-              <p>Remove <strong>{album.title}</strong> from your library?</p>
-              <div className="delete-confirm-actions">
-                <button className="delete-confirm-btn" onClick={() => onDelete(album.id)}>Remove</button>
-                <button className="card-cancel-btn" onClick={() => setConfirmDelete(false)}>Cancel</button>
-              </div>
-            </div>
-          ) : (
-            album.review && <p className="album-review">"{album.review}"</p>
-          )}
-
-          <p className="album-date">
-            {album.dateAdded && !isNaN(new Date(album.dateAdded))
-              ? new Date(album.dateAdded).toLocaleDateString()
-              : 'Unknown date'}
-          </p>
         </div>
       </div>
     </div>

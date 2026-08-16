@@ -3,6 +3,7 @@ import './App.css';
 import vinylLogo from './img/VinylVaultlogo.png';
 import { useAlbums } from './hooks/useAlbums';
 import { useAlbumOfTheYear } from './hooks/useAlbumOfTheYear';
+import { useBodyScrollLock } from './hooks/useBodyScrollLock';
 import TabNav from './components/TabNav';
 import AddAlbumForm from './components/AddAlbumForm';
 import AlbumGrid from './components/AlbumGrid';
@@ -16,6 +17,8 @@ function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const { albums, addAlbum, deleteAlbum, toggleFavorite, updateAlbum } = useAlbums();
   const { rankedIds, addToSlot, removeFromSlot, reorder } = useAlbumOfTheYear();
+
+  useBodyScrollLock(showAddModal);
 
   useEffect(() => {
     if (!showAddModal) return;
@@ -31,7 +34,6 @@ function App() {
       <header className="app-header">
         <div className="header-logo-frame">
           <img src={vinylLogo} alt="" className="header-logo" />
-          <span className="header-needle" aria-hidden="true"></span>
         </div>
         <div className="header-title">
           <h1>The Vinyl Vault</h1>
