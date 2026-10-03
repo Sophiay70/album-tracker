@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import './App.css';
-import vinylLogo from './img/VinylVaultlogo.png';
 import { useAlbums } from './hooks/useAlbums';
 import { useAlbumOfTheYear } from './hooks/useAlbumOfTheYear';
-import { useBodyScrollLock } from './hooks/useBodyScrollLock';
-import TabNav from './components/TabNav';
+import AppNav from './components/AppNav';
+import AmbientBackground from './components/ui/AmbientBackground';
+import Modal from './components/ui/Modal';
+import { useAlbumPalette } from './hooks/useAlbumPalette';
+import { getFeaturedAlbum } from './utils/albumStats';
+import { HOME_PALETTE } from './utils/albumColors';
 import AddAlbumForm from './components/AddAlbumForm';
 import AlbumGrid from './components/AlbumGrid';
-import SuggestedAlbums from './components/SuggestedAlbums';
-import Hero from './components/Hero';
+import Home from './components/Home';
+import PageHeader from './components/PageHeader';
 import AlbumAstrology from './components/AlbumAstrology';
 import AlbumOfTheYears from './components/AlbumOfTheYears';
 
@@ -18,41 +21,50 @@ function App() {
   const { albums, addAlbum, deleteAlbum, toggleFavorite, updateAlbum } = useAlbums();
   const { rankedIds, addToSlot, removeFromSlot, reorder } = useAlbumOfTheYear();
 
-  useBodyScrollLock(showAddModal);
+  const [astrologyAlbum, setAstrologyAlbum] = useState(null);
+  const featured = getFeaturedAlbum(albums);
+  // Ambient background: a fixed warm cream on Home, the selected album's
+  // colors on Astrology, and the brand mix everywhere else.
+  const astrologyPalette = useAlbumPalette(activeTab === 'Album Astrology' ? astrologyAlbum : null);
+  const palette =
+    activeTab === 'Home' ? HOME_PALETTE
+    : activeTab === 'Album Astrology' ? astrologyPalette
+    : null;
 
-  useEffect(() => {
-    if (!showAddModal) return;
-    function handleEscape(e) {
-      if (e.key === 'Escape') setShowAddModal(false);
-    }
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [showAddModal]);
+  function changeTab(tab) {
+    if (tab !== activeTab) window.scrollTo(0, 0);
+    setActiveTab(tab);
+  }
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="header-logo-frame">
-          <img src={vinylLogo} alt="" className="header-logo" />
-        </div>
-        <div className="header-title">
-          <h1>The Vinyl Vault</h1>
-        </div>
-        <p>A home for the records you love</p>
-      </header>
-      <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="app-main">
-        {activeTab === 'Home' &&(
-          <div>
-            {<Hero albums={albums} onGoToLibrary={() => setActiveTab('Library')} />}
-            <SuggestedAlbums albums={albums} onAdd={addAlbum} />
-          </div>
+      <a href="#main" className="skip-link">Skip to content</a>
+      <AmbientBackground colors={palette} />
+      <AppNav
+        activeTab={activeTab}
+        onTabChange={changeTab}
+        onAddClick={() => setShowAddModal(true)}
+      />
+      <main className="app-main" id="main" tabIndex={-1}>
+        {activeTab === 'Home' && (
+          <Home
+            albums={albums}
+            featured={featured}
+            onAdd={addAlbum}
+            onAddClick={() => setShowAddModal(true)}
+            onGoToLibrary={() => changeTab('Library')}
+            onToggleFavorite={toggleFavorite}
+            onUpdate={updateAlbum}
+            onDelete={deleteAlbum}
+          />
         )}
         {activeTab === 'Library' && (
           <div>
-            <div className="section-divider">
-              <span>My Record Collection</span>
-            </div>
+            <PageHeader
+              eyebrow="Library"
+              title={<>My record <em>collection</em></>}
+              description="Every album you've logged. Tap a sleeve to see your review."
+            />
             <AlbumGrid
               albums={albums}
               onDelete={deleteAlbum}
@@ -64,10 +76,11 @@ function App() {
         )}
         {activeTab === 'Album of the Years' && (
           <div>
-            <h2 className="tab-title">Album of the Years</h2>
-            <p className="tab-description">
-              Up to 5 albums you'd never skip a track on. Your personal Album of the Year(s).
-            </p>
+            <PageHeader
+              eyebrow="Your top 5"
+              title={<>Album of the <em>Years</em></>}
+              description="Up to 5 albums you'd never skip a track on. Your personal Album of the Year(s)."
+            />
             <AlbumOfTheYears
               albums={albums}
               onUpdate={updateAlbum}
@@ -79,31 +92,20 @@ function App() {
           </div>
         )}
         {activeTab === 'Album Astrology' && (
-          <div className="astrology-tab">
-            <h2 className="tab-title">Album Astrology</h2>
-            <AlbumAstrology albums={albums} />
+          <div>
+            <PageHeader
+              eyebrow="Album Astrology"
+              title={<>What it says <em>about you</em></>}
+              description="Every record has a sign. Pick one of yours and let the stars read your music personality."
+            />
+            <AlbumAstrology albums={albums} onSelectAlbum={setAstrologyAlbum} />
           </div>
         )}
       </main>
 
-      {showAddModal && (
-        <div
-          className="modal-overlay"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}
-        >
-          <div className="modal-panel">
-            <button
-              type="button"
-              className="modal-close-btn"
-              onClick={() => setShowAddModal(false)}
-              title="Close"
-            >
-              ✕
-            </button>
-            <AddAlbumForm onAdd={addAlbum} albums={albums} />
-          </div>
-        </div>
-      )}
+      <Modal open={showAddModal} onClose={() => setShowAddModal(false)} ariaLabel="Add a record">
+        <AddAlbumForm onAdd={addAlbum} albums={albums} />
+      </Modal>
     </div>
   );
 }

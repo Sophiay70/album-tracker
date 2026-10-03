@@ -1,0 +1,781 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   The Vinyl Vault — design tokens, base type, and the shared "glass" pieces.
+   Imported before App.css so page styles can build on these.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ground + ink */
+  --bg: #EEE6D6;
+  --ink: #1F271D;
+  --ink-2: #3E463B;
+  --ink-3: #424C3F;          /* darkened from #4A5547: measured ≥ 4.5:1 over the ambient blobs */
+
+  /* brand */
+  --sage: #3F5A3B;
+  --sage-hover: #2B4028;
+  --sage-soft: rgba(63, 90, 59, 0.12);
+  --sage-ink: #33502F;
+  --sage-deep: #2B4028;      /* small uppercase labels over tinted glass */
+  --amber: #E8B04B;
+  --star: #D9982B;
+  --star-empty: rgba(31, 39, 29, 0.18);
+  --heart: #C9455E;
+  --danger: #A8323F;
+
+  /* glass */
+  --glass-bg: rgba(255, 253, 247, 0.42);
+  --glass-bg-strong: rgba(255, 253, 247, 0.62);
+  --glass-solid: rgba(255, 253, 247, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-blur: 26px;
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --shadow-soft: 0 12px 40px rgba(46, 58, 40, 0.12);
+  --shadow-lift: 0 18px 50px rgba(46, 58, 40, 0.16);
+  --shadow-cover: 0 14px 34px rgba(30, 30, 20, 0.28);
+
+  /* shape */
+  --radius-sm: 10px;
+  --radius-input: 12px;
+  --radius-md: 24px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+
+  /* motion */
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+
+  /* type */
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* layout */
+  --content-max: 1200px;
+  --gutter: 24px;
+  --blob-blur: 90px;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --glass-blur: 15px;
+    --blob-blur: 60px;
+    --gutter: 16px;
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: var(--sage);
+}
+
+a:hover {
+  color: var(--sage-hover);
+}
+
+:focus-visible {
+  outline: 3px solid var(--sage);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  background: var(--ink);
+  border-radius: var(--radius-pill);
+  color: #fff;
+  font-weight: 600;
+  left: 16px;
+  padding: 12px 20px;
+  position: fixed;
+  text-decoration: none;
+  top: 12px;
+  transform: translateY(-160%);
+  z-index: 2000;
+}
+
+.skip-link:focus {
+  color: #fff;
+  transform: none;
+}
+
+.visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* ── Type helpers ─────────────────────────────────────────────────────────── */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 44px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.eyebrow {
+  /* deeper than sage: small caps over tinted glass needs the margin */
+  color: var(--sage-deep);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* ── Glass surfaces ───────────────────────────────────────────────────────── */
+
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), inset 0 -1px 0 rgba(255, 255, 255, 0.25), var(--shadow-soft);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(180%);
+  backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), var(--shadow-lift);
+}
+
+/* Glass never nests more than one level: an inner panel just goes flat. */
+.glass .glass,
+.glass .glass-strong,
+.glass-strong .glass,
+.glass-strong .glass-strong {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-strong {
+    background: var(--glass-solid);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--glass-solid);
+  }
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+.btn {
+  align-items: center;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 15px;
+  font-weight: 600;
+  gap: 8px;
+  justify-content: center;
+  line-height: 1.2;
+  min-height: 44px;
+  padding: 0 20px;
+  text-decoration: none;
+  transition: background-color .2s, box-shadow .2s, transform .2s var(--ease-out);
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.btn-lg {
+  font-size: 16px;
+  min-height: 52px;
+  padding: 0 28px;
+}
+
+.btn-primary {
+  background: var(--sage);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 18px rgba(46, 70, 40, 0.3);
+  color: #fff;
+}
+
+.btn-dark {
+  background: var(--ink);
+  box-shadow: 0 10px 24px rgba(20, 25, 18, 0.25);
+  color: #F6F1E6;
+}
+
+.btn-glass {
+  color: var(--ink);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-icon {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  flex: 0 0 auto;
+  color: var(--ink-2);
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  width: 44px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover:not(:disabled) { background: var(--sage-hover); }
+  .btn-dark:hover:not(:disabled) { background: #000; }
+  .btn-glass:hover:not(:disabled),
+  .btn-ghost:hover:not(:disabled),
+  .btn-icon:not(.btn-primary):hover:not(:disabled) { background: rgba(255, 255, 255, 0.75); }
+  .btn-danger:hover:not(:disabled) { background: #8C2633; }
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ── Chips ────────────────────────────────────────────────────────────────── */
+
+.chip {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  min-height: 44px;
+  padding: 0 20px;
+  transition: background-color .2s, color .2s, box-shadow .2s;
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--sage);
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 16px rgba(46, 70, 40, 0.25);
+  color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip[aria-pressed="false"]:hover { background: rgba(255, 255, 255, 0.7); }
+}
+
+.pill-tag {
+  background: var(--sage-soft);
+  border-radius: var(--radius-pill);
+  color: var(--sage-ink);
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 11px;
+}
+
+/* ── Star rating ──────────────────────────────────────────────────────────── */
+
+.star-rating {
+  align-items: center;
+  display: inline-flex;
+  gap: 2px;
+}
+
+.star-rating .star {
+  background: none;
+  border: 0;
+  color: var(--star-empty);
+  display: inline-grid;
+  line-height: 0;
+  padding: 0;
+  place-items: center;
+}
+
+.star-rating .star svg {
+  display: block;
+  fill: currentColor;
+}
+
+.star-rating .star.filled {
+  color: var(--star);
+}
+
+.star-rating.is-interactive .star {
+  border-radius: 8px;
+  cursor: pointer;
+  height: 44px;
+  width: 40px;
+}
+
+.star-rating.is-interactive .star:focus-visible {
+  outline-offset: 0;
+}
+
+/* ── Vinyl record ─────────────────────────────────────────────────────────── */
+
+.record {
+  aspect-ratio: 1 / 1;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.5px),
+    repeating-radial-gradient(circle at 50% 50%, #1b1b1b 0 2px, #2a2a2a 2px 3px);
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  display: block;
+  position: relative;
+}
+
+/* soft sheen across the grooves */
+.record::before {
+  background: conic-gradient(from 30deg, transparent 0 20%, rgba(255, 255, 255, 0.09) 25%, transparent 32% 70%, rgba(255, 255, 255, 0.07) 75%, transparent 82%);
+  border-radius: 50%;
+  content: '';
+  inset: 0;
+  position: absolute;
+}
+
+.record-label {
+  background: var(--record-label, var(--amber));
+  border-radius: 50%;
+  inset: 34%;
+  position: absolute;
+}
+
+/* spindle hole */
+.record-label::after {
+  background: #111;
+  border-radius: 50%;
+  content: '';
+  height: 12%;
+  left: 44%;
+  position: absolute;
+  top: 44%;
+  width: 12%;
+}
+
+@keyframes vv-spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: vv-spin 6s linear infinite;
+  will-change: transform;
+}
+
+/* paused when scrolled off-screen or when the tab is hidden */
+.spin.is-paused,
+html[data-page-hidden] .spin {
+  animation-play-state: paused;
+}
+
+/* ── Album sleeve (cover + record peeking out) ────────────────────────────── */
+
+.sleeve-wrap {
+  aspect-ratio: 1 / 1;
+  display: block;
+  position: relative;
+  width: 78%;
+}
+
+.sleeve-record {
+  display: block;
+  inset: 3%;
+  position: absolute;
+  transform: translateX(14%);
+  transition: transform .6s var(--ease-out);
+  z-index: 0;
+}
+
+.sleeve-record .record {
+  width: 100%;
+}
+
+.sleeve {
+  display: block;
+  background: linear-gradient(160deg, #8FA886 0%, #3F5A3B 100%);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-cover), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  transition: transform .5s var(--ease-out), box-shadow .5s;
+  z-index: 1;
+}
+
+.sleeve img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.sleeve-placeholder {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 56px);
+  height: 100%;
+  justify-content: center;
+}
+
+/* Desktop: lift + slide out on hover/focus. Touch: .is-revealed is set once
+   the sleeve scrolls into view (see AlbumSleeve). */
+@media (hover: hover) and (pointer: fine) {
+  .sleeve-host:hover .sleeve-wrap .sleeve-record,
+  .sleeve-host:focus-visible .sleeve-wrap .sleeve-record,
+  .sleeve-host:focus-within .sleeve-wrap .sleeve-record {
+    transform: translateX(38%) rotate(180deg);
+  }
+  .sleeve-host:hover .sleeve,
+  .sleeve-host:focus-visible .sleeve,
+  .sleeve-host:focus-within .sleeve {
+    box-shadow: 0 24px 50px rgba(30, 30, 20, 0.35);
+    transform: translateY(-6px) rotate(-1.5deg);
+  }
+}
+
+.sleeve-wrap.is-revealed .sleeve-record {
+  transform: translateX(38%) rotate(180deg);
+}
+
+/* ── Overflow menu ────────────────────────────────────────────────────────── */
+
+.overflow {
+  position: relative;
+}
+
+.overflow-menu {
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+}
+
+/* Menus must stay legible over busy content — including inside glass cards
+   (where the no-nesting rule would flatten them) and the 3D-flipped library
+   cards (where backdrop blur doesn't render). */
+.overflow-menu,
+.glass .overflow-menu,
+.glass-strong .overflow-menu {
+  background: rgba(255, 253, 247, 0.97);
+}
+
+.overflow-menu.opens-up {
+  bottom: calc(100% + 6px);
+  top: auto;
+}
+
+.overflow-item {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  font-size: 15px;
+  font-weight: 500;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  text-align: left;
+}
+
+.overflow-item.is-danger {
+  color: var(--danger);
+}
+
+.overflow-item:hover,
+.overflow-item:focus-visible {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.overflow-item:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ── Modal / sheet ────────────────────────────────────────────────────────── */
+
+.sheet-backdrop {
+  align-items: center;
+  animation: vv-fade-in .25s ease-out;
+  background: rgba(31, 39, 29, 0.38);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 1000;
+}
+
+.sheet {
+  animation: vv-sheet-in .35s var(--ease-out);
+  border-radius: var(--radius-lg);
+  max-height: min(90vh, 900px);
+  max-width: 600px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 32px;
+  position: relative;
+  width: 100%;
+}
+
+/* the sheet sits over a dimmed backdrop, so it needs more opacity to read */
+.sheet.glass-strong {
+  background: rgba(255, 253, 247, 0.82);
+}
+
+.sheet-close {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 1;
+}
+
+.sheet-title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin: 0 48px 20px 0;
+}
+
+@keyframes vv-fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes vv-sheet-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+}
+
+@keyframes vv-sheet-up {
+  from { transform: translateY(100%); }
+}
+
+@media (max-width: 760px) {
+  .sheet-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .sheet {
+    animation-name: vv-sheet-up;
+    border-radius: 28px 28px 0 0;
+    max-height: 92vh;
+    padding: 28px 20px calc(24px + env(safe-area-inset-bottom));
+  }
+  .sheet::before {
+    background: rgba(31, 39, 29, 0.2);
+    border-radius: 3px;
+    content: '';
+    height: 5px;
+    left: 50%;
+    position: absolute;
+    top: 9px;
+    transform: translateX(-50%);
+    width: 40px;
+  }
+}
+
+/* ── Form controls ────────────────────────────────────────────────────────── */
+
+.vv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vv-label {
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vv-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(31, 39, 29, 0.14);
+  border-radius: var(--radius-input);
+  color: var(--ink);
+  /* Must stay >= 16px: iOS Safari zooms in on focus for anything smaller. */
+  font-size: 16px;
+  min-height: 46px;
+  padding: 10px 14px;
+  transition: border-color .2s, box-shadow .2s, background-color .2s;
+  width: 100%;
+}
+
+.vv-input::placeholder {
+  color: #6B7466;
+}
+
+.vv-input:focus {
+  background-color: #fff;
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(63, 90, 59, 0.25);
+  outline: none;
+}
+
+input[type="search"].vv-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A5547' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E") center / 16px no-repeat;
+  cursor: pointer;
+  height: 20px;
+  width: 20px;
+}
+
+select.vv-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233E463B' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 14px center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  padding-right: 40px;
+}
+
+.vv-input.input-error,
+.vv-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+textarea.vv-input {
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* ── Ambient album-art background ─────────────────────────────────────────── */
+
+.ambient {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+.ambient-layer {
+  animation: vv-fade-in .6s ease-out both;
+  inset: 0;
+  position: absolute;
+}
+
+.blob {
+  animation: vv-drift 18s ease-in-out infinite;
+  border-radius: 50%;
+  filter: blur(var(--blob-blur));
+  position: absolute;
+  will-change: transform;
+}
+
+.blob:nth-child(1) { height: 620px; left: -120px; opacity: 0.75; top: -160px; width: 620px; }
+.blob:nth-child(2) { animation-delay: -6s; height: 560px; opacity: 0.45; right: -100px; top: 15vh; width: 560px; }
+.blob:nth-child(3) { animation-delay: -11s; height: 480px; left: 38%; opacity: 0.45; top: 55vh; width: 480px; }
+.blob:nth-child(4) { animation-delay: -3s; bottom: -180px; height: 520px; left: -80px; opacity: 0.35; width: 520px; }
+.blob:nth-child(5) { animation-delay: -9s; bottom: -220px; height: 560px; opacity: 0.45; right: -60px; width: 560px; }
+
+@keyframes vv-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.08); }
+}
+
+html[data-page-hidden] .blob {
+  animation-play-state: paused;
+}
+
+@media (max-width: 760px) {
+  .blob:nth-child(n+4) { display: none; }
+  .blob:nth-child(1) { height: 380px; left: -120px; top: -100px; width: 380px; }
+  .blob:nth-child(2) { height: 340px; right: -140px; top: 30vh; width: 340px; }
+  .blob:nth-child(3) { height: 320px; left: 10%; top: 70vh; width: 320px; }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .blob {
+    animation: none !important;
+  }
+  .sleeve-wrap .sleeve-record,
+  .sleeve {
+    transition: none !important;
+  }
+  /* records sit statically peeking out instead of sliding */
+  .sleeve-wrap .sleeve-record,
+  .sleeve-wrap.is-revealed .sleeve-record {
+    transform: translateX(30%) !important;
+  }
+  .sleeve-host:hover .sleeve,
+  .sleeve-host:focus-within .sleeve {
+    transform: none !important;
+  }
+  .sheet,
+  .sheet-backdrop,
+  .ambient-layer {
+    animation-duration: 1ms !important;
+  }
+}
+
+/* round icon button in the primary color (e.g. the compact "+ Add") */
+.btn-icon.btn-primary {
+  background: var(--sage);
+  color: #fff;
+}

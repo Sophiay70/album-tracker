@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import StarRating from './StarRating';
+import Button, { IconButton } from './ui/Button';
+import { CloseIcon } from './ui/Icons';
 import { filterAlbumsOnly } from '../utils/itunes';
 
 const GENRES = [
@@ -199,53 +201,75 @@ function AddAlbumForm({ onAdd, albums }) {
   const reviewRemaining = LIMITS.review - form.review.length;
   const hasContent = form.title || form.artist || form.genre || form.rating || form.review;
 
+  const errorProps = (name) => (visibleErrors[name]
+    ? { 'aria-invalid': 'true', 'aria-describedby': `${name}-error` }
+    : {});
+
   return (
     <form className="add-album-form" onSubmit={handleSubmit} noValidate>
-      <h2>Add Album</h2>
+      <h2>Add a record</h2>
 
-      {success && <p className="form-success">Album added successfully!</p>}
+      <div role="status" aria-live="polite">
+        {success && <p className="form-success">Album added to your library.</p>}
+      </div>
 
       {/* Search */}
       <div className="search-wrapper" ref={searchRef}>
+        <p className="vv-label search-heading" id="itunes-search-label">Find it on iTunes</p>
         <div className="search-input-row">
+          <label htmlFor="search-album" className="visually-hidden">Search by album name</label>
           <input
-            className="search-input"
-            type="text"
+            id="search-album"
+            className="vv-input search-input"
+            type="search"
             placeholder="Album name"
+            autoComplete="off"
             value={searchAlbum}
             onChange={e => setSearchAlbum(e.target.value)}
             onFocus={() => results.length > 0 && setShowResults(true)}
           />
+          <label htmlFor="search-artist" className="visually-hidden">Search by artist</label>
           <input
-            className="search-input"
-            type="text"
+            id="search-artist"
+            className="vv-input search-input"
+            type="search"
             placeholder="Artist"
+            autoComplete="off"
             value={searchArtist}
             onChange={e => setSearchArtist(e.target.value)}
             onFocus={() => results.length > 0 && setShowResults(true)}
           />
-          {searching && <span className="search-spinner" />}
+          {searching && (
+            <span className="search-spinner" role="status">
+              <span className="visually-hidden">Searching…</span>
+            </span>
+          )}
         </div>
         {searchError && (
-          <p className="search-error">Search failed. Check your connection and try again.</p>
+          <p className="search-error" role="alert">Search failed. Check your connection and try again.</p>
         )}
         {showResults && results.length > 0 && (
-          <ul className="search-results">
+          <ul className="search-results" aria-label="Search results">
             {results.map(r => (
-              <li
-                key={r.collectionId}
-                className="search-result-item"
-                onMouseDown={() => selectResult(r)}
-              >
-                <img
-                  src={r.artworkUrl100}
-                  alt={r.collectionName}
-                  className="search-result-art"
-                />
-                <div className="search-result-info">
-                  <span className="search-result-title">{r.collectionName}</span>
-                  <span className="search-result-artist">{r.artistName}</span>
-                </div>
+              <li key={r.collectionId}>
+                <button
+                  type="button"
+                  className="search-result-item"
+                  onClick={() => selectResult(r)}
+                >
+                  <img
+                    src={r.artworkUrl100}
+                    alt=""
+                    className="search-result-art"
+                    width="44"
+                    height="44"
+                    loading="lazy"
+                  />
+                  <span className="search-result-info">
+                    <span className="search-result-title">{r.collectionName}</span>
+                    <span className="search-result-artist">{r.artistName}</span>
+                  </span>
+                </button>
               </li>
             ))}
           </ul>
@@ -262,21 +286,20 @@ function AddAlbumForm({ onAdd, albums }) {
       {/* Selected artwork preview */}
       {form.artworkUrl && (
         <div className="artwork-preview">
-          <img src={form.artworkUrl} alt="Album artwork" />
-          <button
-            type="button"
+          <img src={form.artworkUrl} alt="Selected album artwork" width="88" height="88" />
+          <IconButton
+            label="Remove artwork"
             className="remove-artwork"
             onClick={() => setForm(prev => ({ ...prev, artworkUrl: '' }))}
-            title="Remove artwork"
           >
-            ✕
-          </button>
+            <CloseIcon size={16} />
+          </IconButton>
         </div>
       )}
 
       <div className="form-row">
-        <div className="field">
-          <label className="field-label" htmlFor="title">Album Title *</label>
+        <div className="vv-field field">
+          <label className="vv-label" htmlFor="title">Album title <span aria-hidden="true">*</span></label>
           <input
             id="title"
             name="title"
@@ -285,14 +308,16 @@ function AddAlbumForm({ onAdd, albums }) {
             onChange={handleChange}
             onBlur={handleBlur}
             maxLength={LIMITS.title + 1}
-            className={visibleErrors.title ? 'input-error' : ''}
+            required
+            className={`vv-input ${visibleErrors.title ? 'input-error' : ''}`}
+            {...errorProps('title')}
           />
           {visibleErrors.title && (
-            <span className="field-error">{visibleErrors.title}</span>
+            <span className="field-error" id="title-error">{visibleErrors.title}</span>
           )}
         </div>
-        <div className="field">
-          <label className="field-label" htmlFor="artist">Artist *</label>
+        <div className="vv-field field">
+          <label className="vv-label" htmlFor="artist">Artist <span aria-hidden="true">*</span></label>
           <input
             id="artist"
             name="artist"
@@ -301,33 +326,37 @@ function AddAlbumForm({ onAdd, albums }) {
             onChange={handleChange}
             onBlur={handleBlur}
             maxLength={LIMITS.artist + 1}
-            className={visibleErrors.artist ? 'input-error' : ''}
+            required
+            className={`vv-input ${visibleErrors.artist ? 'input-error' : ''}`}
+            {...errorProps('artist')}
           />
           {visibleErrors.artist && (
-            <span className="field-error">{visibleErrors.artist}</span>
+            <span className="field-error" id="artist-error">{visibleErrors.artist}</span>
           )}
         </div>
       </div>
 
       <div className="form-row">
-        <div className="field">
-          <label className="field-label" htmlFor="genre">Genre</label>
-          <select id="genre" name="genre" value={form.genre} onChange={handleChange}>
+        <div className="vv-field field">
+          <label className="vv-label" htmlFor="genre">Genre</label>
+          <select id="genre" name="genre" className="vv-input" value={form.genre} onChange={handleChange}>
             <option value="">Select genre</option>
             {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
         </div>
-        <div className="rating-field">
-          <span>Your rating:</span>
+        <div className="vv-field field">
+          <span className="vv-label" aria-hidden="true">Your rating</span>
           <StarRating
             rating={form.rating}
+            label="Your rating"
+            size={28}
             onRate={r => setForm(prev => ({ ...prev, rating: r }))}
           />
         </div>
       </div>
 
-      <div className="field">
-        <label className="field-label" htmlFor="review">Review</label>
+      <div className="vv-field field">
+        <label className="vv-label" htmlFor="review">Review</label>
         <textarea
           id="review"
           name="review"
@@ -335,13 +364,14 @@ function AddAlbumForm({ onAdd, albums }) {
           value={form.review}
           onChange={handleChange}
           onBlur={handleBlur}
-          rows={3}
+          rows={4}
           maxLength={LIMITS.review}
-          className={visibleErrors.review ? 'input-error' : ''}
+          className={`vv-input ${visibleErrors.review ? 'input-error' : ''}`}
+          {...errorProps('review')}
         />
         <div className="review-footer">
           {visibleErrors.review && (
-            <span className="field-error">{visibleErrors.review}</span>
+            <span className="field-error" id="review-error">{visibleErrors.review}</span>
           )}
           <span className={`char-count ${reviewRemaining < 50 ? 'char-count-warn' : ''}`}>
             {reviewRemaining} / {LIMITS.review}
@@ -350,11 +380,9 @@ function AddAlbumForm({ onAdd, albums }) {
       </div>
 
       <div className="form-actions">
-        <button type="submit">Add Album</button>
+        <Button type="submit">Add album</Button>
         {hasContent && (
-          <button type="button" className="clear-btn" onClick={handleClear}>
-            Clear
-          </button>
+          <Button variant="ghost" onClick={handleClear}>Clear</Button>
         )}
       </div>
     </form>

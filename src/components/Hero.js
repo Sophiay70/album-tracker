@@ -1,46 +1,75 @@
-import gramophone from '../img/gramophone5.png';
+import GlassPanel from './ui/GlassPanel';
+import Button from './ui/Button';
+import AlbumSleeve from './ui/AlbumSleeve';
+import Record from './ui/Record';
+import StarRating from './StarRating';
+import { useAlbumPalette } from '../hooks/useAlbumPalette';
+import { greeting } from '../utils/albumStats';
+import { pastelFor } from '../utils/albumColors';
 
-function Hero({ albums, onGoToLibrary }) {
-    const totalAlbums = albums.length;
-const favoriteCount = albums.filter(a => a.favorite).length;
-const avgRating = totalAlbums === 0 ? 0 : albums.reduce((sum, album) => sum + album.rating, 0) / totalAlbums;
+function NowSpinning({ album, onAddClick }) {
+  const palette = useAlbumPalette(album);
+
+  if (!album) {
+    return (
+      <GlassPanel strong className="now-spinning now-spinning-empty">
+        <p className="eyebrow">Nothing spinning yet</p>
+        <div className="now-spinning-empty-record">
+          <Record spinning labelColor="var(--amber)" />
+        </div>
+        <p className="now-spinning-empty-copy">Log your first album and it'll show up here.</p>
+        <Button onClick={onAddClick}>Log an album</Button>
+      </GlassPanel>
+    );
+  }
 
   return (
-  <div className="hero">
-    {/*Music Notes — trailing up and out of the gramophone's horn */}
-    <span className="note note-1">♪</span>
-    <span className="note note-2">♫</span>
-    <span className="note note-3">♪</span>
-    <span className="note note-4">♫</span>
-    <span className="note note-5">♪</span>
-    <span className="note note-6">♫</span>
-    <h2>Your Vault</h2>
-    <p>Rate the albums you love, write reviews, and build your collection.</p>
-    {/*button to library after hero banner*/}
-<button className="hero-cta" onClick={onGoToLibrary}>
-  Add your records
-</button>
+    <GlassPanel strong as="section" className="now-spinning sleeve-host" aria-label="Now spinning">
+      <div className="now-spinning-top">
+        <p className="eyebrow now-spinning-live">
+          <span className="live-dot" aria-hidden="true" />
+          Now spinning
+        </p>
+        <span className="now-spinning-note">{album.favorite ? 'Latest favorite' : 'Latest log'}</span>
+      </div>
+      <AlbumSleeve
+        album={album}
+        className="now-spinning-sleeve"
+        spinning
+        revealed
+        eager
+        labelColor={palette?.[1] || palette?.[0] || pastelFor(album)}
+      />
+      <div className="now-spinning-info">
+        <div className="now-spinning-text">
+          <p className="now-spinning-title">{album.title}</p>
+          <p className="now-spinning-artist">{album.artist}</p>
+        </div>
+        <StarRating rating={album.rating} readOnly size={18} />
+      </div>
+    </GlassPanel>
+  );
+}
 
-    <div className="hero-shelf">
-      <img src={gramophone} alt="" className="hero-gramophone" />
-    </div>
-
-    <div className="hero-stats">
-      <div className="stat">
-        <span className="stat-number">{totalAlbums}</span>
-        <span className="stat-label">Albums Logged</span>
+function Hero({ featured, onGoToLibrary, onAddClick }) {
+  return (
+    <section className="home-hero" aria-labelledby="home-title">
+      <div className="home-hero-copy">
+        <p className="eyebrow">{greeting()}</p>
+        <h1 id="home-title" className="home-hero-title">
+          Your Vault,<br /><em>spinning.</em>
+        </h1>
+        <p className="home-hero-lede">
+          Rate the albums you love, write reviews, and build a digital shelf of your record collection.
+        </p>
+        <div className="home-hero-actions">
+          <Button variant="dark" size="lg" onClick={onAddClick}>Log an album</Button>
+          <Button variant="glass" size="lg" onClick={onGoToLibrary}>Browse library</Button>
+        </div>
       </div>
-      <div className="stat">
-        <span className="stat-number">{avgRating.toFixed(1)}</span>
-        <span className="stat-label">Avg Rating</span>
-      </div>
-      <div className="stat">
-        <span className="stat-number">{favoriteCount}</span>
-        <span className="stat-label">Favorites</span>
-      </div>
-    </div>
-  </div>
-);
+      <NowSpinning album={featured} onAddClick={onAddClick} />
+    </section>
+  );
 }
 
 export default Hero;
