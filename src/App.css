@@ -1611,6 +1611,9 @@
 }
 
 .hof-record-photo {
+  /* the <img> height attribute would otherwise beat aspect-ratio and
+     stretch the disc into an oval */
+  height: auto;
   object-fit: cover;
 }
 
