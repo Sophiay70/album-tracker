@@ -43,8 +43,8 @@ function FilledSlot({ album, rank, total, onRemove, onMove }) {
           className="hof-menu"
           label={`Options for ${album.title}`}
           items={[
-            ...(rank > 1 ? [{ label: 'Move earlier', onSelect: () => onMove(album.id, -1) }] : []),
-            ...(rank < total ? [{ label: 'Move later', onSelect: () => onMove(album.id, 1) }] : []),
+            ...(rank > 1 ? [{ label: 'Move up', onSelect: () => onMove(album.id, -1) }] : []),
+            ...(rank < total ? [{ label: 'Move down', onSelect: () => onMove(album.id, 1) }] : []),
             { label: 'Remove from top 5', icon: <TrashIcon size={18} />, danger: true, onSelect: () => onRemove(album.id) },
           ]}
         />
