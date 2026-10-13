@@ -11,7 +11,7 @@ const GENRES = [
 
 const LIMITS = { title: 100, artist: 100, review: 2000 };
 
-const EMPTY_FORM = { title: '', artist: '', genre: '', rating: 0, review: '', artworkUrl: '' };
+const EMPTY_FORM = { title: '', artist: '', genre: '', rating: 0, review: '', artworkUrl: '', itunesCollectionId: null };
 
 // Map iTunes genre names to our predefined list
 const GENRE_MAP = {
@@ -156,6 +156,8 @@ function AddAlbumForm({ onAdd, albums }) {
       artist: result.artistName,
       genre: mapGenre(result.primaryGenreName),
       artworkUrl: result.artworkUrl100?.replace('100x100bb', '600x600bb') || '',
+      // Lets Album Astrology fetch the real tracklist later.
+      itunesCollectionId: result.collectionId || null,
     }));
     setSearchAlbum('');
     setSearchArtist('');
@@ -166,7 +168,12 @@ function AddAlbumForm({ onAdd, albums }) {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm(prev => ({
+      ...prev,
+      [name]: value,
+      // A hand-edited title or artist may no longer be the iTunes album we picked.
+      ...(name === 'title' || name === 'artist' ? { itunesCollectionId: null } : {}),
+    }));
     setSuccess(false);
   }
 
