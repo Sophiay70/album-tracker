@@ -8,11 +8,11 @@
 //   in the client bundle.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function generatePersonality({ title, artist, genre, itunesCollectionId }) {
+export async function generatePersonality({ title, artist, genre }) {
   const response = await fetch('/.netlify/functions/personality', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, artist, genre, itunesCollectionId }),
+    body: JSON.stringify({ title, artist, genre }),
   });
 
   const data = await response.json().catch(() => ({}));

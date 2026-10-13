@@ -12,24 +12,21 @@
 // a plain `term` search with "- Single" results, so after the client drops
 // singles there's nothing left. For those, `?artist=` resolves the artist
 // and returns their whole discography via the lookup endpoint instead.
-async function artistAlbums(artist, signal) {
+async function artistAlbums(artist) {
   const search = new URLSearchParams({
     term: artist, entity: 'musicArtist', media: 'music', limit: '1', country: 'us',
   });
-  const found = await fetch(`https://itunes.apple.com/search?${search}`, { signal }).then(r => r.ok ? r.json() : null);
+  const found = await fetch(`https://itunes.apple.com/search?${search}`).then(r => r.ok ? r.json() : null);
   const artistId = found?.results?.[0]?.artistId;
   if (!artistId) return { resultCount: 0, results: [] };
 
   const lookup = new URLSearchParams({ id: String(artistId), entity: 'album', limit: '200', country: 'us' });
-  const data = await fetch(`https://itunes.apple.com/lookup?${lookup}`, { signal }).then(r => r.ok ? r.json() : null);
+  const data = await fetch(`https://itunes.apple.com/lookup?${lookup}`).then(r => r.ok ? r.json() : null);
   if (!data) throw new Error('lookup failed');
   // The first lookup result is the artist itself; keep only the albums.
   const results = (data.results || []).filter(r => r.wrapperType === 'collection');
   return { resultCount: results.length, results };
 }
-
-// Also used by personality.js to match library albums to iTunes.
-exports.artistAlbums = artistAlbums;
 
 exports.handler = async (event) => {
   const { term, attribute, limit, artist } = event.queryStringParameters || {};

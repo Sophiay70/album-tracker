@@ -128,7 +128,6 @@ function SuggestedAlbums({ albums, onAdd }) {
       rating,
       review: review.trim(),
       artworkUrl: art(result, 600),
-      itunesCollectionId: result.collectionId || null,
     });
     setAdding(null);
   }

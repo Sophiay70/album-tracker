@@ -53,7 +53,6 @@ function AlbumAstrology({ albums, onSelectAlbum }) {
         title: selectedAlbum.title,
         artist: selectedAlbum.artist,
         genre: selectedAlbum.genre,
-        itunesCollectionId: selectedAlbum.itunesCollectionId,
       });
       setPersonality(result);
     } catch (err) {
