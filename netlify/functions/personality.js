@@ -39,7 +39,8 @@ exports.handler = async (event) => {
     `how they move through the world. Warm, a little cheeky, specific enough to feel personal.\n` +
     `- Include one contrast ("X, but also Y") and one plain, relatable thing they'd actually do, described simply.\n` +
     `- Do not mention any song titles, lyrics, release years, chart positions, or other facts about the album. ` +
-    `Describe its mood and energy only in general terms.\n` +
+    `Describe its mood and energy only in general terms. The exact album title is the only exception.\n` +
+    `- Mention the album by its exact title once, in quotation marks, placed naturally in the reading.\n` +
     `- Sentence 2: one affectionate tease about a relatable tendency this taste gives away: ` +
     `a mood, a way they react, or a soft spot. No specific objects, purchases, hobbies, or places. Vary it.\n` +
     `- Don't use: "keen eye", "keen ear", "unapologetic", "bold", "in short".\n` +
