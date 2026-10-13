@@ -8,3 +8,10 @@ export function filterAlbumsOnly(results) {
     return !labeledSingle && !tooFewTracks;
   });
 }
+
+// Case- and accent-insensitive "contains" check, so typing "manana sera"
+// still finds "MAÑANA SERÁ BONITO".
+const fold = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+export function titleMatches(collectionName, query) {
+  return fold(collectionName).includes(fold(query));
+}

@@ -2012,7 +2012,14 @@ span.search-result-art {
   color: var(--danger);
   margin: 0;
   padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
 }
+
+.astro-error p { margin: 0; }
 
 .astro-empty {
   align-items: center;
