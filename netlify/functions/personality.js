@@ -37,6 +37,7 @@ exports.handler = async (event) => {
     `- Speak directly to the user as "you". Call their collection their "library", never a "playlist".\n` +
     `- Write it like a horoscope: about their personality, how they feel, what they're drawn to, ` +
     `how they move through the world. Warm, a little cheeky, specific enough to feel personal.\n` +
+    `- Include one contrast ("X, but also Y") and one plain, relatable thing they'd actually do, described simply.\n` +
     `- Do not mention any song titles, lyrics, release years, chart positions, or other facts about the album. ` +
     `Describe its mood and energy only in general terms.\n` +
     `- Sentence 2: one affectionate tease about a relatable tendency this taste gives away: ` +
