@@ -8,8 +8,35 @@
 // own Netlify function means the phone only ever talks to our own domain —
 // the server-to-server call to Apple happens from Netlify's IP instead.
 
+// Artists who release lots of singles (Bad Bunny, Karol G, Young Miko…) fill
+// a plain `term` search with "- Single" results, so after the client drops
+// singles there's nothing left. For those, `?artist=` resolves the artist
+// and returns their whole discography via the lookup endpoint instead.
+async function artistAlbums(artist) {
+  const search = new URLSearchParams({
+    term: artist, entity: 'musicArtist', media: 'music', limit: '1', country: 'us',
+  });
+  const found = await fetch(`https://itunes.apple.com/search?${search}`).then(r => r.ok ? r.json() : null);
+  const artistId = found?.results?.[0]?.artistId;
+  if (!artistId) return { resultCount: 0, results: [] };
+
+  const lookup = new URLSearchParams({ id: String(artistId), entity: 'album', limit: '200', country: 'us' });
+  const data = await fetch(`https://itunes.apple.com/lookup?${lookup}`).then(r => r.ok ? r.json() : null);
+  if (!data) throw new Error('lookup failed');
+  // The first lookup result is the artist itself; keep only the albums.
+  const results = (data.results || []).filter(r => r.wrapperType === 'collection');
+  return { resultCount: results.length, results };
+}
+
 exports.handler = async (event) => {
-  const { term, attribute, limit } = event.queryStringParameters || {};
+  const { term, attribute, limit, artist } = event.queryStringParameters || {};
+  if (artist) {
+    try {
+      return { statusCode: 200, body: JSON.stringify(await artistAlbums(artist)) };
+    } catch {
+      return { statusCode: 502, body: JSON.stringify({ error: 'iTunes lookup failed.' }) };
+    }
+  }
   if (!term) {
     return { statusCode: 400, body: JSON.stringify({ error: 'term is required.' }) };
   }

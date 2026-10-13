@@ -29,11 +29,26 @@ exports.handler = async (event) => {
 
   const genreClause = genre ? ` (${genre})` : '';
   const prompt =
-    `Someone just added "${title}" by ${artist}${genreClause} to their music collection. ` +
-    `In 2–3 sentences, write a fun, insightful personality description of what this says about them as a person. ` +
-    `Be specific to this album and artist. Keep it playful and flattering.`;
+    `The user just added "${title}" by ${artist}${genreClause} to their library. ` +
+    `Write their music-astrology reading: a playful read of who they are as a person, ` +
+    `based on the mood, genre, and persona of this album.\n\n` +
+    `Rules:\n` +
+    `- Exactly 2-3 sentences of plain prose. No heading, markdown, emoji, or list.\n` +
+    `- Speak directly to the user as "you". Call their collection their "library", never a "playlist".\n` +
+    `- Write it like a horoscope: about their personality, how they feel, what they're drawn to, ` +
+    `how they move through the world. Warm, a little cheeky, specific enough to feel personal.\n` +
+    `- Do not mention any song titles, lyrics, release years, chart positions, or other facts about the album. ` +
+    `Describe its mood and energy only in general terms.\n` +
+    `- Sentence 2: one affectionate tease about a relatable tendency this taste gives away: ` +
+    `a mood, a way they react, or a soft spot. No specific objects, purchases, hobbies, or places. Vary it.\n` +
+    `- Don't use: "keen eye", "keen ear", "unapologetic", "bold", "in short".\n` +
+    `- Don't open with "You" or the album or artist name.`;
 
-  try {
+  // gpt-oss is a reasoning model: its hidden reasoning tokens count against
+  // max_tokens, so the old 200-token cap often ran out mid-reading
+  // (finish_reason "length"). Keep reasoning light, give it real headroom,
+  // and only accept a reading the model actually finished.
+  async function requestReading() {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -42,24 +57,40 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: 'openai/gpt-oss-120b',
-        max_tokens: 200,
+        max_tokens: 1024,
+        reasoning_effort: 'low',
+        temperature: 1,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: err.error?.message || `Groq API error (${response.status})` }),
-      };
+      return { status: response.status, error: err.error?.message || `Groq API error (${response.status})` };
     }
 
     const data = await response.json();
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ result: data.choices[0].message.content }),
-    };
+    const choice = data.choices?.[0];
+    const text = (choice?.message?.content || '').replace(/^#+\s.*\n+/, '').trim();
+    const complete = choice?.finish_reason === 'stop' && /[.!?…)"”’]$/.test(text);
+    return complete ? { result: text } : { truncated: true };
+  }
+
+  try {
+    let reading = await requestReading();
+    // One automatic retry for a cut-off reading.
+    if (reading.truncated) reading = await requestReading();
+
+    if (reading.result) {
+      return { statusCode: 200, body: JSON.stringify({ result: reading.result }) };
+    }
+    if (reading.truncated) {
+      return {
+        statusCode: 502,
+        body: JSON.stringify({ error: 'The stars got a little tongue-tied on this one. Give it another try.' }),
+      };
+    }
+    return { statusCode: reading.status, body: JSON.stringify({ error: reading.error }) };
   } catch {
     return { statusCode: 502, body: JSON.stringify({ error: 'Failed to reach Groq.' }) };
   }

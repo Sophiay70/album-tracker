@@ -152,7 +152,10 @@ function AlbumAstrology({ albums, onSelectAlbum }) {
             )}
 
             {error && !loading && (
-              <p className="astro-error" role="alert">{error}</p>
+              <div className="astro-error" role="alert">
+                <p>{error}</p>
+                <Button variant="ghost" onClick={handleReveal}>Try again</Button>
+              </div>
             )}
 
             {personality && !loading && (

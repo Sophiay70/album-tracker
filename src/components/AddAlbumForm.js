@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import StarRating from './StarRating';
 import Button, { IconButton } from './ui/Button';
 import { CloseIcon } from './ui/Icons';
-import { filterAlbumsOnly } from '../utils/itunes';
+import { filterAlbumsOnly, titleMatches } from '../utils/itunes';
 
 const GENRES = [
   'Rock', 'Pop', 'Hip-Hop', 'Jazz', 'Classical', 'Electronic',
@@ -103,18 +103,27 @@ function AddAlbumForm({ onAdd, albums }) {
       setSearching(true);
       setSearchError(false);
       try {
-        let url;
-        if (album && artist) {
-          url = `/.netlify/functions/itunes-search?term=${encodeURIComponent(`${artist} ${album}`)}&limit=8`;
-        } else if (artist) {
-          url = `/.netlify/functions/itunes-search?term=${encodeURIComponent(artist)}&attribute=artistTerm&limit=8`;
-        } else {
-          url = `/.netlify/functions/itunes-search?term=${encodeURIComponent(album)}&attribute=albumTerm&limit=8`;
+        const search = async (query) => {
+          const res = await fetch(`/.netlify/functions/itunes-search?${query}`, { signal: controller.signal });
+          if (!res.ok) throw new Error();
+          return filterAlbumsOnly((await res.json()).results);
+        };
+        let found = [];
+        // With an artist, pull their full discography — a plain term search
+        // gets swamped by singles for artists like Bad Bunny or Karol G.
+        if (artist) {
+          found = await search(`artist=${encodeURIComponent(artist)}`);
+          if (album) found = found.filter(r => titleMatches(r.collectionName, album));
         }
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setResults(filterAlbumsOnly(data.results));
+        if (found.length === 0) {
+          const query = album && artist
+            ? `term=${encodeURIComponent(`${artist} ${album}`)}&limit=50`
+            : artist
+              ? `term=${encodeURIComponent(artist)}&attribute=artistTerm&limit=50`
+              : `term=${encodeURIComponent(album)}&attribute=albumTerm&limit=50`;
+          found = await search(query);
+        }
+        setResults(found.slice(0, 8));
         setShowResults(true);
       } catch (err) {
         if (err.name !== 'AbortError') {
