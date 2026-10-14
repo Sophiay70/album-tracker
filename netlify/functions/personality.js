@@ -5,6 +5,24 @@
 // prefix — that prefix is what makes Create React App bundle a variable
 // into the public client JS, which is exactly what we're avoiding here).
 
+// Every reading gets the same rules, and the model can't see earlier
+// readings, so it drifts to the same few things to say. A random angle per
+// request makes readings say different things, not just reword them.
+const ANGLES = [
+  'how they act around friends',
+  'how they handle being alone',
+  'how they deal with change or plans falling through',
+  'how they show they care about someone',
+  'what they\'re like when they\'re annoyed',
+  'how they recharge after a long week',
+  'how they make decisions',
+  'what they\'re like at the start of something new',
+  'how they handle their feelings',
+  'what their friends would tease them about',
+  'their mornings versus their nights',
+  'what they\'re like when they\'re excited about something',
+];
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
@@ -28,6 +46,7 @@ exports.handler = async (event) => {
   }
 
   const genreClause = genre ? ` (${genre})` : '';
+  const angle = ANGLES[Math.floor(Math.random() * ANGLES.length)];
   const prompt =
     `The user just added "${title}" by ${artist}${genreClause} to their library. ` +
     `Write their music-astrology reading: a playful read of who they are as a person, ` +
@@ -37,11 +56,17 @@ exports.handler = async (event) => {
     `- Speak directly to the user as "you". Call their collection their "library", never a "playlist".\n` +
     `- Write it like a horoscope: about their personality, how they feel, what they're drawn to, ` +
     `how they move through the world. Warm, a little cheeky, specific enough to feel personal.\n` +
+    `- This reading's angle: ${angle}. Build it around that.\n` +
+    `- Write casually, like a friend texting them: everyday words, contractions, short sentences are fine. ` +
+    `Plain words over fancy ones, and don't use the same describing word twice.\n` +
+    `- Include one contrast ("X, but also Y") and one plain, relatable thing they'd actually do, described simply.\n` +
     `- Do not mention any song titles, lyrics, release years, chart positions, or other facts about the album. ` +
-    `Describe its mood and energy only in general terms.\n` +
+    `Describe its mood and energy only in general terms. The exact album title is the only exception.\n` +
+    `- Mention the album by its exact title once, in quotation marks, placed naturally in the reading.\n` +
     `- Sentence 2: one affectionate tease about a relatable tendency this taste gives away: ` +
     `a mood, a way they react, or a soft spot. No specific objects, purchases, hobbies, or places. Vary it.\n` +
-    `- Don't use: "keen eye", "keen ear", "unapologetic", "bold", "in short".\n` +
+    `- Don't use: "keen eye", "keen ear", "unapologetic", "bold", "in short", "vibe", "soul", "energy", ` +
+    `"journey", "embrace", "navigate", "effortlessly", "secretly", "deep down", "main character".\n` +
     `- Don't open with "You" or the album or artist name.`;
 
   // gpt-oss is a reasoning model: its hidden reasoning tokens count against
